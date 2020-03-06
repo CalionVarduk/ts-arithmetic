@@ -1,0 +1,47 @@
+{
+  "name": "frl-ts-arithmetic",
+  "version": "0.0.1",
+  "description": "A lightweight math & arithmetic framework for TypeScript",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "test": "jest --config jestconfig.json",
+    "test:coverage": "jest --config jestconfig.json --coverage",
+    "build": "tsc",
+    "lint": "tslint -p tsconfig.json",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CalionVarduk/ts-arithmetic.git"
+  },
+  "keywords": [
+    "calionvarduk",
+    "frl",
+    "typescript",
+    "arithmetic",
+    "math"
+  ],
+  "author": "CalionVarduk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CalionVarduk/ts-arithmetic/issues"
+  },
+  "homepage": "https://github.com/CalionVarduk/ts-arithmetic#readme",
+  "devDependencies": {
+    "@types/jest": "^25.1.3",
+    "coveralls": "^3.0.3",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.1",
+    "tslint": "^5.16.0",
+    "typescript": "3.1.6",
+    "frl-ts-mocking": "^2.0.0"
+  }
+}
