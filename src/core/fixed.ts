@@ -739,34 +739,70 @@ export class Fixed
     }
 }
 
+/**
+ * Provides basic mathematics functionality for the fixed-point numbers.
+ */
 export namespace FixedMath
 {
+    /**
+     * Returns the smaller fixed-point number out of the two provided parameters.
+     * @param first a first fixed-point number
+     * @param second a second fixed-point number
+     * @returns a new fixed-point number
+     */
     export function Min(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
         return (first.compareTo(second) < 0 ? first : second).clone();
     }
 
+    /**
+     * Returns the greater fixed-point number out of the two provided parameters.
+     * @param first a first fixed-point number
+     * @param second a second fixed-point number
+     * @returns a new fixed-point number
+     */
     export function Max(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
         return (first.compareTo(second) > 0 ? first : second).clone();
     }
 
+    /**
+     * Returns the absolute value of a fixed-point number.
+     * @param fixed a fixed-point number to calculate the absolute value from
+     * @returns a new fixed-point number
+     */
     export function Abs(fixed: Readonly<Fixed>): Fixed
     {
-        return fixed.normalizedValue >= 0 ? fixed.clone() : Fixed.Negate(fixed);
+        return fixed.isNegative ? Fixed.Negate(fixed) : fixed.clone();
     }
 
+    /**
+     * Returns the integral part of a fixed-point number.
+     * @param fixed a fixed-point number to extract the integral part from
+     * @returns a new fixed-point number
+     */
     export function Truncate(fixed: Readonly<Fixed>): Fixed
     {
         const remainder = fixed.normalizedValue % FIXED_METADATA[fixed.precision].offset;
         return Fixed.FromNormalized(fixed.normalizedValue - remainder, fixed.precision);
     }
 
+    /**
+     * Returns the fractional part of a fixed-point number.
+     * @param fixed a fixed-point number to extract the fractional part from
+     * @returns a new fixed-point number
+     */
     export function Fractional(fixed: Readonly<Fixed>): Fixed
     {
         return Fixed.ModuloByNormalized(fixed, FIXED_METADATA[fixed.precision].offset);
     }
 
+    /**
+     * Returns a fixed-point number parameter rounded to the provided `precision`.
+     * @param fixed a fixed-point number to round
+     * @param precision precision to round to
+     * @returns a new fixed-point number with the parameter's precision
+     */
     export function Round(fixed: Readonly<Fixed>, precision: FixedPrecision): Fixed
     {
         if (precision >= fixed.precision)
@@ -777,6 +813,11 @@ export namespace FixedMath
         return Fixed.FromNormalized(normalized, fixed.precision);
     }
 
+    /**
+     * Creates a fixed-point number that represents the smallest integer greater than or equal to the `fixed` parameter.
+     * @param fixed a fixed-point number to calculate the ceiling from
+     * @returns a new fixed-point number
+     */
     export function Ceil(fixed: Readonly<Fixed>): Fixed
     {
         const remainder = fixed.normalizedValue % FIXED_METADATA[fixed.precision].offset;
@@ -787,6 +828,11 @@ export namespace FixedMath
         return fixed.isPositive ? result.addNumber(1) : result;
     }
 
+    /**
+     * Creates a fixed-point number that represents the greatest integer less than or equal to the `fixed` parameter.
+     * @param fixed a fixed-point number to calculate the floor from
+     * @returns a new fixed-point number
+     */
     export function Floor(fixed: Readonly<Fixed>): Fixed
     {
         const remainder = fixed.normalizedValue % FIXED_METADATA[fixed.precision].offset;
@@ -797,16 +843,34 @@ export namespace FixedMath
         return fixed.isPositive ? result : result.subtractNumber(1);
     }
 
+    /**
+     * Returns the sign of a fixed-point number, indicating whether it is positive, negative or zero.
+     * @param fixed fixed-point number to test
+     * @returns parameter's sign
+     */
     export function Sign(fixed: Readonly<Fixed>): number
     {
         return Math.sign(fixed.normalizedValue);
     }
 
+    /**
+     * Creates a pseudorandom fixed-point number between `0` and `Fixed.GetMaxValue(precision)`.
+     * @param precision precision of the result
+     * @returns a new fixed-point number
+     */
     export function Random(precision: FixedPrecision): Fixed
     {
-        return Fixed.FromNormalized(Math.random() * FIXED_METADATA[precision].maxValue, precision);
+        return Fixed.FromNormalized(Math.random() * FIXED_METADATA[0].maxValue, precision);
     }
 
+    /**
+     * Calculates a sum of a fixed-point numbers collection.
+     * @param collection fixed-point numbers to sum
+     * @param precision optional precision of the result,
+     * if not provided, then the precision of the first collection element will be used,
+     * if collection is empty, then 0 will be used
+     * @returns a new fixed-point number
+     */
     export function Sum(collection: ReadonlyArray<Readonly<Fixed>>, precision?: FixedPrecision): Fixed
     {
         if (collection.length === 0)

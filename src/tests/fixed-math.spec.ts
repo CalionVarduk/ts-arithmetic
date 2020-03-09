@@ -785,12 +785,10 @@ test('static Random should return correct result',
                 const result = FixedMath.Random(p);
                 expect(result.precision).toBe(p);
                 expect(result.normalizedValue).toBeGreaterThanOrEqual(0);
-                expect(result.normalizedValue).toBeLessThanOrEqual(Fixed.GetMaxValue(p));
+                expect(result.normalizedValue).toBeLessThanOrEqual(Fixed.GetMaxValue(0));
             });
     }
 );
-
-// sum
 
 test('static Sum for empty collection should return zero',
     () =>
@@ -805,5 +803,60 @@ test('static Sum for empty collection should return zero',
         const result = FixedMath.Sum([]);
         expect(result.precision).toBe(0);
         expect(result.normalizedValue).toBe(0);
+    }
+);
+
+each([
+    [[0, 1, 2, 3], 6],
+    [[0], 0],
+    [[1], 1],
+    [[1, -1], 0],
+    [[0, 1, 0, 0, 1], 2],
+    [[-1, -2, -3], -6],
+    [[100, 245, -34567, 1234526, 11, -243, 77, -4], 1200145]
+])
+.test('static Sum should return correct result for the same precision (%#): norm. values: %o, expected norm. value: %f',
+    (values: number[], expected: number) =>
+    {
+        forAllPrecisions(p =>
+            {
+                const params = values.map(v => Fixed.FromNormalized(v, p));
+                const result = FixedMath.Sum(params);
+                expect(params.some(f => f === result)).toBe(false);
+                expect(result.precision).toBe(p);
+                expect(result.normalizedValue).toBe(expected);
+            }
+        );
+    }
+);
+
+each([
+    [[Fixed.FromNormalized(0, 5),
+        Fixed.FromNormalized(1, 4),
+        Fixed.FromNormalized(2, 3),
+        Fixed.FromNormalized(3, 1)],
+        void(0), 30210],
+    [[Fixed.FromNormalized(153, 3)],
+        2, 15],
+    [[Fixed.FromNormalized(1000, 3),
+        Fixed.FromNormalized(-100, 2)],
+        10, 0],
+    [[Fixed.FromNormalized(-123, 3),
+        Fixed.FromNormalized(-89, 2),
+        Fixed.FromNormalized(-234567, 7)],
+        void(0), -1036],
+    [[Fixed.FromNormalized(100, 2),
+        Fixed.FromNormalized(245678, 3),
+        Fixed.FromNormalized(-123, 1),
+        Fixed.FromNormalized(123456789, 8)],
+        7, 2356125679]
+])
+.test('static Sum should return correct result for the same precision (%#): values: %o, precision: %f, expected norm. value: %f',
+    (values: Fixed[], precision: FixedPrecision | undefined, expected: number) =>
+    {
+            const result = FixedMath.Sum(values, precision);
+            expect(values.some(f => f === result)).toBe(false);
+            expect(result.precision).toBe(precision || values[0].precision);
+            expect(result.normalizedValue).toBe(expected);
     }
 );
