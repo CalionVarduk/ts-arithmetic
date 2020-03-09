@@ -773,23 +773,14 @@ export namespace FixedMath
             return fixed.clone();
 
         const metadata = FIXED_METADATA[fixed.precision - precision];
-        const remainder = fixed.normalizedValue % metadata.offset;
-        let midpointOffset: number = 0;
-        if (remainder < 0)
-        {
-            if (remainder <= -(metadata.offset / 2))
-                midpointOffset = -1 * metadata.offset;
-        }
-        else if (remainder >= (metadata.offset / 2))
-            midpointOffset = 1 * metadata.offset;
-
-        return Fixed.FromNormalized(fixed.normalizedValue - remainder + midpointOffset, fixed.precision);
+        const normalized = Math.round(fixed.normalizedValue / metadata.offset) * metadata.offset;
+        return Fixed.FromNormalized(normalized, fixed.precision);
     }
 
     export function Ceil(fixed: Readonly<Fixed>): Fixed
     {
         const remainder = fixed.normalizedValue % FIXED_METADATA[fixed.precision].offset;
-        if (remainder === 0)
+        if (remainder === 0 || remainder === -0)
             return fixed.clone();
 
         const result = Fixed.FromNormalized(fixed.normalizedValue - remainder, fixed.precision);
@@ -799,7 +790,7 @@ export namespace FixedMath
     export function Floor(fixed: Readonly<Fixed>): Fixed
     {
         const remainder = fixed.normalizedValue % FIXED_METADATA[fixed.precision].offset;
-        if (remainder === 0)
+        if (remainder === 0 || remainder === -0)
             return fixed.clone();
 
         const result = Fixed.FromNormalized(fixed.normalizedValue - remainder, fixed.precision);
