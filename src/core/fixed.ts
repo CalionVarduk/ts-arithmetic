@@ -153,7 +153,7 @@ export class Fixed
      * Adds a fixed-point number to another fixed-point number.
      * @param first fixed-point number to add to
      * @param second fixed-point number to add
-     * @returns new fixed-point number
+     * @returns new fixed-point number with the `first` parameter's precision
      */
     public static Add(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
@@ -186,7 +186,7 @@ export class Fixed
      * Subtracts a fixed-point number from another fixed-point number.
      * @param first fixed-point number to subtract from
      * @param second fixed-point number to subtract
-     * @returns new fixed-point number
+     * @returns new fixed-point number with the `first` parameter's precision
      */
     public static Subtract(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
@@ -219,7 +219,7 @@ export class Fixed
      * Multiplies a fixed-point number by another fixed-point number.
      * @param first fixed-point number to multiply
      * @param second fixed-point number to multiply by
-     * @returns new fixed-point number
+     * @returns new fixed-point number with the `first` parameter's precision
      */
     public static Multiply(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
@@ -252,7 +252,7 @@ export class Fixed
      * Divides a fixed-point number by another fixed-point number.
      * @param first fixed-point number to divide
      * @param second fixed-point number to divide by
-     * @returns new fixed-point number
+     * @returns new fixed-point number with the `first` parameter's precision
      */
     public static Divide(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
@@ -285,7 +285,7 @@ export class Fixed
      * Calculates the remainder of a fixed-point number division by another fixed-point number.
      * @param first fixed-point number to modulo
      * @param second fixed-point number to modulo by
-     * @returns new fixed-point number
+     * @returns new fixed-point number with the `first` parameter's precision
      */
     public static Modulo(first: Readonly<Fixed>, second: Readonly<Fixed>): Fixed
     {
@@ -332,6 +332,22 @@ export class Fixed
     public get isSafe(): boolean
     {
         return this._normalizedValue >= FIXED_METADATA[0].minValue && this._normalizedValue <= FIXED_METADATA[0].maxValue;
+    }
+
+    /**
+     * Specifies whether or not a fixed-point number represents NaN (not a number).
+     */
+    public get isNaN(): boolean
+    {
+        return isNaN(this._normalizedValue);
+    }
+
+    /**
+     * Specifies whether or not a fixed-point number represents an infinity.
+     */
+    public get isInfinity(): boolean
+    {
+        return !isFinite(this._normalizedValue) && !this.isNaN;
     }
 
     /**
@@ -408,7 +424,7 @@ export class Fixed
             return this;
 
         const result = new Fixed(precision);
-        return result._assignImpl(precisionCast(this._normalizedValue, this._metadata, result._metadata));
+        return result._assign(precisionCast(this._normalizedValue, this._metadata, result._metadata));
     }
 
     /**
@@ -452,7 +468,7 @@ export class Fixed
      */
     public assign(other: Readonly<Fixed>): this
     {
-        return this._assignImpl(fixedCast(other, this));
+        return this._assign(fixedCast(other, this));
     }
 
     /**
@@ -462,7 +478,7 @@ export class Fixed
      */
     public assignNumber(value: number): this
     {
-        return this._assignImpl(numberCast(value, this._metadata));
+        return this._assign(numberCast(value, this._metadata));
     }
 
     /**
@@ -472,7 +488,7 @@ export class Fixed
      */
     public assignNormalized(value: number): this
     {
-        return this._assignImpl(Math.trunc(value));
+        return this._assign(Math.trunc(value));
     }
 
     /**
@@ -481,7 +497,7 @@ export class Fixed
      */
     public negate(): this
     {
-        return this._assignImpl(-this._normalizedValue);
+        return this._assign(-this._normalizedValue);
     }
 
     /**
@@ -491,7 +507,7 @@ export class Fixed
      */
     public add(other: Readonly<Fixed>): this
     {
-        return this._addImpl(fixedCast(other, this));
+        return this._add(fixedCast(other, this));
     }
 
     /**
@@ -501,7 +517,7 @@ export class Fixed
      */
     public addNumber(value: number): this
     {
-        return this._addImpl(numberCast(value, this._metadata));
+        return this._add(numberCast(value, this._metadata));
     }
 
     /**
@@ -511,7 +527,7 @@ export class Fixed
      */
     public addNormalized(value: number): this
     {
-        return this._addImpl(Math.trunc(value));
+        return this._add(Math.trunc(value));
     }
 
     /**
@@ -521,7 +537,7 @@ export class Fixed
      */
     public subtract(other: Readonly<Fixed>): this
     {
-        return this._subtractImpl(fixedCast(other, this));
+        return this._sub(fixedCast(other, this));
     }
 
     /**
@@ -531,7 +547,7 @@ export class Fixed
      */
     public subtractNumber(value: number): this
     {
-        return this._subtractImpl(numberCast(value, this._metadata));
+        return this._sub(numberCast(value, this._metadata));
     }
 
     /**
@@ -541,7 +557,7 @@ export class Fixed
      */
     public subtractNormalized(value: number): this
     {
-        return this._subtractImpl(Math.trunc(value));
+        return this._sub(Math.trunc(value));
     }
 
     /**
@@ -551,7 +567,7 @@ export class Fixed
      */
     public multiply(other: Readonly<Fixed>): this
     {
-        return this._multiplyImpl(fixedCast(other, this));
+        return this._mul(other.normalizedValue, FIXED_METADATA[other.precision]);
     }
 
     /**
@@ -561,7 +577,7 @@ export class Fixed
      */
     public multiplyByNumber(value: number): this
     {
-        return this._multiplyImpl(numberCast(value, this._metadata));
+        return this._mulN(value);
     }
 
     /**
@@ -571,7 +587,7 @@ export class Fixed
      */
     public multiplyByNormalized(value: number): this
     {
-        return this._multiplyImpl(Math.trunc(value));
+        return this._mul(Math.trunc(value), this._metadata);
     }
 
     /**
@@ -581,7 +597,7 @@ export class Fixed
      */
     public divide(other: Readonly<Fixed>): this
     {
-        return this._divideImpl(fixedCast(other, this));
+        return this._div(other.normalizedValue, FIXED_METADATA[other.precision]);
     }
 
     /**
@@ -591,7 +607,7 @@ export class Fixed
      */
     public divideByNumber(value: number): this
     {
-        return this._divideImpl(numberCast(value, this._metadata));
+        return this._divN(value);
     }
 
     /**
@@ -601,7 +617,7 @@ export class Fixed
      */
     public divideByNormalized(value: number): this
     {
-        return this._divideImpl(Math.trunc(value));
+        return this._div(Math.trunc(value), this._metadata);
     }
 
     /**
@@ -611,7 +627,9 @@ export class Fixed
      */
     public modulo(other: Readonly<Fixed>): this
     {
-        return this._moduloImpl(fixedCast(other, this));
+        return this.precision === other.precision ?
+            this._mod(other.normalizedValue) :
+            this._modN(other.normalizedValue / FIXED_METADATA[other.precision].offset);
     }
 
     /**
@@ -621,7 +639,7 @@ export class Fixed
      */
     public moduloByNumber(value: number): this
     {
-        return this._moduloImpl(numberCast(value, this._metadata));
+        return this._modN(value);
     }
 
     /**
@@ -631,7 +649,7 @@ export class Fixed
      */
     public moduloByNormalized(value: number): this
     {
-        return this._moduloImpl(Math.trunc(value));
+        return this._mod(Math.trunc(value));
     }
 
     /**
@@ -644,12 +662,9 @@ export class Fixed
         if (this.precision === other.precision)
             return this._normalizedValue === other.normalizedValue;
 
-        if (this.precision > other.precision)
-            return this._normalizedValue ===
-                (incrPrecisionCast(other.normalizedValue, FIXED_METADATA[other.precision], this._metadata) || 0);
-
-        return (incrPrecisionCast(this._normalizedValue, this._metadata, FIXED_METADATA[other.precision]) || 0) ===
-            other.normalizedValue;
+        return this.precision > other.precision ?
+            this._normalizedValue === incrPrecisionCast(other.normalizedValue, FIXED_METADATA[other.precision], this._metadata) :
+            incrPrecisionCast(this._normalizedValue, this._metadata, FIXED_METADATA[other.precision]) === other.normalizedValue;
     }
 
     /**
@@ -662,43 +677,65 @@ export class Fixed
     public compareTo(other: Readonly<Fixed>): number
     {
         if (this.precision === other.precision)
-            return (this._normalizedValue - other.normalizedValue) || 0;
+            return this._normalizedValue - other.normalizedValue;
 
-        if (this.precision > other.precision)
-            return (this._normalizedValue - incrPrecisionCast(other.normalizedValue, FIXED_METADATA[other.precision], this._metadata)) || 0;
-
-        return (incrPrecisionCast(this._normalizedValue, this._metadata, FIXED_METADATA[other.precision]) - other.normalizedValue) || 0;
+        return this.precision > other.precision ?
+            this._normalizedValue - incrPrecisionCast(other.normalizedValue, FIXED_METADATA[other.precision], this._metadata) :
+            incrPrecisionCast(this._normalizedValue, this._metadata, FIXED_METADATA[other.precision]) - other.normalizedValue;
     }
 
-    private _assignImpl(normalized: number): this
+    private _assign(normalized: number): this
     {
-        this._normalizedValue = normalized || 0;
+        this._normalizedValue = normalized === -0 ? 0 : normalized;
         return this;
     }
 
-    private _addImpl(normalized: number): this
+    private _add(normalized: number): this
     {
-        return this._assignImpl(this._normalizedValue + normalized);
+        const result = this._normalizedValue + normalized;
+        return this._assign(result);
     }
 
-    private _subtractImpl(normalized: number): this
+    private _sub(normalized: number): this
     {
-        return this._assignImpl(this._normalizedValue - normalized);
+        const result = this._normalizedValue - normalized;
+        return this._assign(result);
     }
 
-    private _multiplyImpl(normalized: number): this
+    private _mul(normalized: number, metadata: FixedMetadata): this
     {
-        return this._assignImpl((this._normalizedValue * normalized) / this._metadata.offset);
+        const result = Math.round((this._normalizedValue * normalized) / metadata.offset);
+        return this._assign(result);
     }
 
-    private _divideImpl(normalized: number): this
+    private _mulN(value: number): this
     {
-        return this._assignImpl(numberCast(this._normalizedValue / normalized, this._metadata));
+        const result = Math.round(this._normalizedValue * value);
+        return this._assign(result);
     }
 
-    private _moduloImpl(normalized: number): this
+    private _div(normalized: number, metadata: FixedMetadata): this
     {
-        return this._assignImpl(this._normalizedValue % normalized);
+        const result = numberCast(this._normalizedValue / normalized, metadata);
+        return this._assign(result);
+    }
+
+    private _divN(value: number): this
+    {
+        const result = Math.round(this._normalizedValue / value);
+        return this._assign(result);
+    }
+
+    private _mod(normalized: number): this
+    {
+        const result = this._normalizedValue % normalized;
+        return this._assign(result);
+    }
+
+    private _modN(value: number): this
+    {
+        const result = Math.round(((this._normalizedValue / value) % this._metadata.offset) * value);
+        return this._assign(result);
     }
 }
 
