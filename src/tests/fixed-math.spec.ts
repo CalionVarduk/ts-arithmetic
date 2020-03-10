@@ -2,7 +2,7 @@ import { Fixed, FixedMath } from '../core/fixed';
 import { FixedPrecision } from '../core/fixed-precision';
 import each from 'jest-each';
 
-const precisions = [...Array(16).keys()];
+const precisions = [...Array(Fixed.MAX_PRECISION + 1).keys()];
 
 function forAllPrecisions(action: (p: FixedPrecision) => void): void
 {

@@ -63,6 +63,16 @@ function numberCast(value: number, target: FixedMetadata): number
 export class Fixed
 {
     /**
+     * Specifies the smallest precision supported by the Fixed class.
+    */
+    public static readonly MIN_PRECISION: FixedPrecision = 0;
+
+    /**
+     * Specifies the biggest precision supported by the Fixed class.
+    */
+    public static readonly MAX_PRECISION: FixedPrecision = 15;
+
+    /**
      * Returns max safe value representable by a fixed-point number with the provided `precision`.
      * @param precision precision of the max value
      * @returns max safe value
@@ -331,7 +341,8 @@ export class Fixed
      */
     public get isSafe(): boolean
     {
-        return this._normalizedValue >= FIXED_METADATA[0].minValue && this._normalizedValue <= FIXED_METADATA[0].maxValue;
+        return this._normalizedValue >= Fixed.GetMinValue(Fixed.MIN_PRECISION) &&
+            this._normalizedValue <= Fixed.GetMaxValue(Fixed.MIN_PRECISION);
     }
 
     /**
@@ -860,7 +871,7 @@ export namespace FixedMath
      */
     export function Random(precision: FixedPrecision): Fixed
     {
-        return Fixed.FromNormalized(Math.random() * FIXED_METADATA[0].maxValue, precision);
+        return Fixed.FromNormalized(Math.random() * Fixed.GetMaxValue(Fixed.MIN_PRECISION), precision);
     }
 
     /**
@@ -874,7 +885,7 @@ export namespace FixedMath
     export function Sum(collection: ReadonlyArray<Readonly<Fixed>>, precision?: FixedPrecision): Fixed
     {
         if (collection.length === 0)
-            return Fixed.FromNormalized(0, precision || 0);
+            return Fixed.FromNormalized(0, precision || Fixed.MIN_PRECISION);
 
         const result = Fixed.FromFixed(collection[0], precision);
         for (let i = 1; i < collection.length; ++i)

@@ -4,7 +4,7 @@ import each from 'jest-each';
 import { partialMock, mock } from 'frl-ts-mocking/lib/core/mock';
 import { IMockedMethodInfo } from 'frl-ts-mocking/lib/core/mocked-method-info.interface';
 
-const precisions = [...Array(16).keys()];
+const precisions = [...Array(Fixed.MAX_PRECISION + 1).keys()];
 
 function forAllPrecisions(action: (p: FixedPrecision) => void): void
 {
@@ -21,6 +21,20 @@ test('ctor should create zeros with proper precision',
                 expect(fixed.precision).toBe(p);
                 expect(fixed.normalizedValue).toBe(0);
             });
+    }
+);
+
+test('static MIN_PRECISION should be equal to 0',
+    () =>
+    {
+        expect(Fixed.MIN_PRECISION).toBe(0);
+    }
+);
+
+test('static MAX_PRECISION should be equal to 15',
+    () =>
+    {
+        expect(Fixed.MAX_PRECISION).toBe(15);
     }
 );
 
