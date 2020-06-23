@@ -42,6 +42,6 @@
     "ts-jest": "^25.2.1",
     "tslint": "^5.16.0",
     "typescript": "3.1.6",
-    "frl-ts-mocking": "^2.0.0"
+    "frl-ts-mocking": "^2.1.0"
   }
 }
