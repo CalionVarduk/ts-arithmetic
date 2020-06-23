@@ -1,2 +1,2 @@
-export * from './core/fixed-precision';
-export * from './core/fixed';
+export * from './fixed-precision';
+export * from './fixed';

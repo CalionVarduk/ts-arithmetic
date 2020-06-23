@@ -1,5 +1,5 @@
-import { Fixed, FixedMath } from '../core/fixed';
-import { FixedPrecision } from '../core/fixed-precision';
+import { Fixed, FixedMath } from '../src/fixed';
+import { FixedPrecision } from '../src/fixed-precision';
 import each from 'jest-each';
 
 const precisions = [...Array(Fixed.MAX_PRECISION + 1).keys()];
